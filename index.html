@@ -2,134 +2,187 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>BoilerDoc Pricing Calculator</title>
+  <title>Services Pricing Tool – BoilerDoc & WeldServe</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 24px; max-width: 900px; }
-    h1 { margin-bottom: 4px; }
-    h2 { margin-top: 24px; }
-    label { font-weight: 600; display:block; margin-top:10px; }
-    select, input { width: 360px; padding:4px; margin-top:4px; }
-    .row { margin-bottom: 8px; }
-    .two-col { display:flex; flex-wrap:wrap; gap:32px; }
-    .card { border:1px solid #ccc; padding:12px 16px; margin-top:16px; border-radius:4px; }
-    .value { font-weight:700; }
+    :root {
+      --primary: #0b7285; --primary-light: #e3fafc;
+      --border: #dde2e5; --bg: #f5f7fa; --text: #222;
+    }
+    * { box-sizing: border-box; }
+    body { font-family: system-ui,-apple-system,"Segoe UI",sans-serif; margin:0; background:var(--bg); color:var(--text); }
+    .wrapper { max-width: 980px; margin: 32px auto 40px; padding: 0 16px; }
+    header h1 { margin:0 0 4px; font-size:24px; color:var(--primary); }
+    header p { margin:0; color:#555; font-size:13px; }
+    .service-toggle { margin-top:12px; display:flex; gap:8px; }
+    .pill {
+      padding:6px 16px; border-radius:999px; border:1px solid var(--border);
+      background:#fff; cursor:pointer; font-size:13px;
+    }
+    .pill.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+    .grid { display:grid; grid-template-columns:minmax(0,1.1fr) minmax(0,0.9fr); gap:20px; margin-top:20px; }
+    .card { background:#fff; border-radius:10px; border:1px solid var(--border); box-shadow:0 4px 8px rgba(15,23,42,0.04); padding:16px 18px 18px; }
+    .card h2 { margin:0 0 10px; font-size:16px; color:#111827; }
+    label { font-weight:600; display:block; margin-top:10px; font-size:13px; }
+    select,input {
+      width:100%; padding:6px 8px; margin-top:4px; border-radius:6px;
+      border:1px solid #cbd5e1; font-size:13px;
+    }
+    select:focus,input:focus { outline:2px solid var(--primary-light); border-color:var(--primary); }
+    .two-col { display:flex; flex-wrap:wrap; gap:16px; margin-top:4px; align-items:flex-end; }
+    .two-col>div { flex:1 1 0; }
+    #calcBtn {
+      margin-top:14px; padding:10px 28px; font-size:15px; font-weight:600;
+      cursor:pointer; background:var(--primary); color:#fff; border-radius:999px;
+      border:none; box-shadow:0 3px 6px rgba(15,23,42,0.18);
+    }
+    #calcBtn:hover { background:#0c8599; }
+    .output-row { display:flex; justify-content:space-between; margin-top:6px; padding:6px 8px; border-radius:6px; }
+    .output-row:nth-child(odd) { background:#f8fafc; }
+    .output-label { font-size:13px; color:#555; }
+    .value { font-weight:700; font-size:15px; color:#111827; }
+    .hint { font-size:11px; color:#6b7280; margin-top:4px; }
+    .tag { display:inline-block; padding:2px 8px; border-radius:999px; background:var(--primary-light); color:var(--primary); font-size:11px; font-weight:600; margin-left:4px; }
+    .hidden { display:none; }
+    @media(max-width:800px){ .grid{grid-template-columns:1fr;} }
   </style>
 </head>
 <body>
-<h1>BoilerDoc – RLA Pricing Tool</h1>
-<p>Quick calculator based on your Excel BoilerDoc Tool & List sheets.</p>
-
-<div class="card">
-  <h2>Inputs</h2>
-
-  <div class="row">
-    <label for="capacity">Q1. Equipment type / boiler capacity</label>
-    <select id="capacity">
-      <option>Boiler: Upto 2 tph</option>
-      <option>Boiler: 3 tph - 6 tph</option>
-      <option>Boiler: 7 tph - 10tph</option>
-      <option>Boiler: 10 - 15tph</option>
-      <option>Boiler: > 15 tph</option>
-      <option>Chimney</option>
-      <option>Heater</option>
-    </select>
-  </div>
-
-  <div class="row">
-    <label for="vendorMandays">Q2. Budgeted vendor manpower (mandays)</label>
-    <input id="vendorMandays" type="number" value="13" min="0" step="0.1">
-  </div>
-
-  <div class="row">
-    <label for="internalMandays">Q3. Budgeted internal manpower (Thermax mandays)</label>
-    <input id="internalMandays" type="number" value="1" min="0" step="0.1">
-  </div>
-
-  <div class="row">
-    <label for="customerType">Type of customer</label>
-    <select id="customerType">
-      <option>Corporate (Global HQ, National-level account)</option>
-      <option>Corporate (India-based standalone)</option>
-      <option>MSME/ Owner-driven</option>
-    </select>
-  </div>
-
-  <div class="row">
-    <label for="localVendors">Q4. Is the customer likely to take service from local vendors?</label>
-    <select id="localVendors">
-      <option>No</option>
-      <option>Yes</option>
-    </select>
-  </div>
-
-  <div class="row">
-    <label for="reason">Q5. Primary reason for availing the service</label>
-    <select id="reason">
-      <option>Thermax-led (Push from Thermax)</option>
-      <option>Customer-led (Regulatory compliance/ Internal compliance)</option>
-    </select>
-  </div>
-
-  <div class="two-col">
-    <div>
-      <label for="vendorRate">Vendor cost per manday (₹)</label>
-      <input id="vendorRate" type="number" value="6700">
+<div class="wrapper">
+  <header>
+    <h1>Services Pricing Tool</h1>
+    <p>Margin-based pricing for BoilerDoc (RLA) and WeldServe (welding repairs).</p>
+    <div class="service-toggle">
+      <button class="pill active" id="tab-boilerdoc" onclick="setService('BoilerDoc')">BoilerDoc – RLA</button>
+      <button class="pill" id="tab-weldserve"  onclick="setService('WeldServe')">WeldServe – Welding Repairs</button>
     </div>
-    <div>
-      <label for="internalRate">Thermax engineer cost per manday (₹)</label>
-      <input id="internalRate" type="number" value="4200">
+  </header>
+
+  <div class="grid">
+    <div class="card">
+      <h2 id="inputsTitle">Inputs – BoilerDoc</h2>
+
+      <!-- BoilerDoc inputs -->
+      <div id="boilerdocInputs">
+        <label for="bd_capacity">Q1. Equipment type / boiler capacity</label>
+        <select id="bd_capacity">
+          <option>Boiler: Upto 2 tph</option>
+          <option>Boiler: 3 tph - 6 tph</option>
+          <option>Boiler: 7 tph - 10tph</option>
+          <option>Boiler: 10 - 15tph</option>
+          <option>Boiler: > 15 tph</option>
+          <option>Chimney</option>
+          <option>Heater</option>
+        </select>
+
+        <label for="bd_vendorMd">Q2. Budgeted vendor manpower (mandays)</label>
+        <input id="bd_vendorMd" type="number" value="13" min="0" step="1">
+
+        <label for="bd_internalMd">Q3. Budgeted internal manpower (Thermax mandays)</label>
+        <input id="bd_internalMd" type="number" value="1" min="0" step="1">
+
+        <label for="bd_customerType">Customer type</label>
+        <select id="bd_customerType">
+          <option>Corporate (Global HQ, National-level account)</option>
+          <option>Corporate (India-based standalone)</option>
+          <option>MSME/ Owner-driven</option>
+        </select>
+
+        <label for="bd_localVendors">Q4. Likely to use local vendors?</label>
+        <select id="bd_localVendors">
+          <option>No</option>
+          <option>Yes</option>
+        </select>
+
+        <label for="bd_reason">Q5. Primary reason for availing the service</label>
+        <select id="bd_reason">
+          <option>Thermax-led (Push from Thermax)</option>
+          <option>Customer-led (Regulatory compliance/ Internal compliance)</option>
+        </select>
+      </div>
+
+      <!-- WeldServe inputs -->
+      <div id="weldserveInputs" class="hidden">
+        <label for="ws_activity">Q1. Activity type</label>
+        <select id="ws_activity">
+          <option>Coil repair</option>
+          <option>Pressure part repair</option>
+          <option>Pressure part replacement</option>
+          <option>Others</option>
+        </select>
+
+        <label for="ws_vendorMd">Q2. Budgeted vendor manpower (mandays)</label>
+        <input id="ws_vendorMd" type="number" value="2" min="0" step="1">
+
+        <label for="ws_internalMd">Q3. Budgeted internal manpower (Thermax mandays)</label>
+        <input id="ws_internalMd" type="number" value="5" min="0" step="1">
+
+        <label for="ws_customerType">Customer type</label>
+        <select id="ws_customerType">
+          <option>Corporate (Global HQ, National-level account)</option>
+          <option>Corporate (India-based standalone)</option>
+          <option>MSME/ Owner-driven</option>
+        </select>
+
+        <label for="ws_localVendors">Q5. Likely to use local vendors?</label>
+        <select id="ws_localVendors">
+          <option>No</option>
+          <option>Yes</option>
+        </select>
+
+        <label for="ws_urgency">Q6. Urgency / time to delivery</label>
+        <select id="ws_urgency">
+          <option>Non-urgent (> 5 days)</option>
+          <option>Moderate (3-5 days)</option>
+          <option>Urgent (Upto 2 days)</option>
+        </select>
+      </div>
+
+      <!-- Shared hidden cost fields -->
+      <div class="hidden">
+        <input id="vendorRate" type="number" value="6700">
+        <input id="internalRate" type="number" value="4200">
+        <input id="lbCost" type="number" value="0">
+      </div>
+
+      <div class="two-col">
+        <div>
+          <label for="disc">Discount % <span class="tag">optional</span></label>
+          <input id="disc" type="number" value="0" min="0">
+        </div>
+        <div>
+          <label for="prem">Premium % <span class="tag">optional</span></label>
+          <input id="prem" type="number" value="0">
+        </div>
+      </div>
+
+      <button id="calcBtn" onclick="recalc()">Calculate</button>
+      <div class="hint">Start without discount/premium to see the recommended price.</div>
+    </div>
+
+    <div class="card">
+      <h2>Outputs</h2>
+      <div class="output-row">
+        <div class="output-label">Recommended margin %</div>
+        <div class="value" id="recMargin">–</div>
+      </div>
+      <div class="output-row">
+        <div class="output-label">Recommended price (₹)</div>
+        <div class="value" id="recPrice">–</div>
+      </div>
+      <div class="output-row">
+        <div class="output-label">Final price after discount / premium (₹)</div>
+        <div class="value" id="finalPrice">–</div>
+      </div>
+      <div class="hint" id="hintText">
+        BoilerDoc margins capped 48–84% as per Excel guidelines.
+      </div>
     </div>
   </div>
-
-  <div class="two-col">
-    <div>
-      <label for="lbCost">Lodging / boarding (₹, total)</label>
-      <input id="lbCost" type="number" value="0">
-    </div>
-    <div>
-      <label for="disc">Discount % (optional)</label>
-      <input id="disc" type="number" value="0">
-    </div>
-  </div>
-
-  <div class="row">
-    <label for="prem">Premium % (optional)</label>
-    <input id="prem" type="number" value="0">
-  </div>
-
-  <button onclick="recalc()">Calculate</button>
-</div>
-
-<div class="card">
-  <h2>Outputs</h2>
-  <div>Minimum manpower based on equipment (mandays): <span class="value" id="minMandays">–</span></div>
-  <div>Estimated vendor cost (₹): <span class="value" id="vendorCost">–</span></div>
-  <div>Estimated internal cost (₹): <span class="value" id="internalCost">–</span></div>
-  <div>Total cost incl. L/B (₹): <span class="value" id="totalCost">–</span></div>
-  <hr>
-  <div>Base margin % (capacity × customer type): <span class="value" id="baseMargin">–</span></div>
-  <div>Value‑based uplift from Q2–Q5 %: <span class="value" id="uplift">–</span></div>
-  <div>Recommended margin % (capped 48–84): <span class="value" id="recMargin">–</span></div>
-  <div>Recommended price (₹): <span class="value" id="recPrice">–</span></div>
-  <div>Final price after discount/premium (₹): <span class="value" id="finalPrice">–</span></div>
 </div>
 
 <script>
-// ===== Lookup tables reproduced from BoilerDoc - List ===== [file:106]
-
-// Minimum mandays by capacity
-const minMandaysTable = {
-  "Boiler: Upto 2 tph": 5,
-  "Boiler: 3 tph - 6 tph": 10,
-  "Boiler: 7 tph - 10tph": 12,
-  "Boiler: 10 - 15tph": 15,
-  "Boiler: > 15 tph": 20,
-  "Chimney": 4,
-  "Heater": 4
-};
-
-// Base margin % by capacity × customer type
-const baseMarginTable = {
+// --- BoilerDoc tables (as before) [file:123]
+const baseMarginBoilerDoc = {
   "Boiler: Upto 2 tph|Corporate (Global HQ, National-level account)": 0.60,
   "Boiler: 3 tph - 6 tph|Corporate (Global HQ, National-level account)": 0.63,
   "Boiler: 7 tph - 10tph|Corporate (Global HQ, National-level account)": 0.66,
@@ -154,87 +207,151 @@ const baseMarginTable = {
   "Chimney|MSME/ Owner-driven": 0.48,
   "Heater|MSME/ Owner-driven": 0.48
 };
+const BD_UP_CAP   = 0.03;
+const BD_UP_CUST  = 0.06;
+const BD_UP_REASON= 0.06;
+const BD_UP_VENDOR= 0.06;
+const BD_MIN_M = 0.48;
+const BD_MAX_M = 0.84;
 
-// Uplifts derived from your std-dev logic (absolute points) [file:106]
-const UPLIFT_CAPACITY = 0.03;  // 3 pp
-const UPLIFT_CUSTTYPE = 0.06;  // 6 pp
-const UPLIFT_REASON   = 0.06;  // 6 pp
-const UPLIFT_VENDOR   = 0.06;  // 6 pp
-const MIN_MARGIN = 0.48;
-const MAX_MARGIN = 0.84;
-
-// Extra uplift based on Q4 (local vendors) × Q5 (reason) combo [file:106]
-function q4q5Extra(local, reason) {
-  if (local === "Yes" && reason.startsWith("Thermax-led")) return 0.00;  // YesThermax-led = 0%
-  if (local === "No"  && reason.startsWith("Customer-led")) return 0.12; // NoCustomer-led = 12%
-  if (local === "Yes" && reason.startsWith("Customer-led")) return 0.06; // YesCustomer-led = 6%
-  if (local === "No"  && reason.startsWith("Thermax-led")) return 0.06;  // NoThermax-led = 6%
+function bd_q4q5Extra(local, reason) {
+  if (local === "Yes" && reason.startsWith("Thermax-led")) return 0.00;
+  if (local === "No"  && reason.startsWith("Customer-led")) return 0.12;
+  if (local === "Yes" && reason.startsWith("Customer-led")) return 0.06;
+  if (local === "No"  && reason.startsWith("Thermax-led")) return 0.06;
   return 0;
 }
 
-// ===== Core calculation =====
-function recalc() {
-  const cap   = document.getElementById('capacity').value;
-  const vMd   = Number(document.getElementById('vendorMandays').value || 0);
-  const iMd   = Number(document.getElementById('internalMandays').value || 0);
-  const cust  = document.getElementById('customerType').value;
-  const local = document.getElementById('localVendors').value;
-  const reason= document.getElementById('reason').value;
+// --- WeldServe tables [file:123]
+// Base margin by activity × customer type
+const baseMarginWeldServe = {
+  "Coil repair|Corporate (Global HQ, National-level account)": 0.75,
+  "Pressure part repair|Corporate (Global HQ, National-level account)": 0.623,
+  "Pressure part replacement|Corporate (Global HQ, National-level account)": 0.57,
+  "Others|Corporate (Global HQ, National-level account)": 0.63,
 
+  "Coil repair|Corporate (India-based standalone)": 0.669,
+  "Pressure part repair|Corporate (India-based standalone)": 0.542,
+  "Pressure part replacement|Corporate (India-based standalone)": 0.489,
+  "Others|Corporate (India-based standalone)": 0.55,
+
+  "Coil repair|MSME/ Owner-driven": 0.589,
+  "Pressure part repair|MSME/ Owner-driven": 0.462,
+  "Pressure part replacement|MSME/ Owner-driven": 0.409,
+  "Others|MSME/ Owner-driven": 0.47
+};
+// Urgency + local-vendor uplift % [file:123]
+function ws_urgencyLocalUplift(urgency, local) {
+  const key = urgency + "|" + local;
+  switch (key) {
+    case "Non-urgent (> 5 days)|Yes": return 0.00;
+    case "Non-urgent (> 5 days)|No": return 0.08;
+    case "Moderate (3-5 days)|Yes": return 0.08;
+    case "Moderate (3-5 days)|No": return 0.16;
+    case "Urgent (Upto 2 days)|Yes": return 0.24;
+    case "Urgent (Upto 2 days)|No": return 0.16;
+    default: return 0;
+  }
+}
+// Additional manpower adjustment factor % by activity [file:123]
+const ws_extraMandayFactor = {
+  "Coil repair": 0.00,
+  "Pressure part repair": 0.10,
+  "Pressure part replacement": 0.15,
+  "Others": 0.15
+};
+// Min/max margins by activity [file:123]
+const ws_minMaxMargin = {
+  "Coil repair": {min: 0.59, max: 0.83},
+  "Pressure part repair": {min: 0.46, max: 0.70},
+  "Pressure part replacement": {min: 0.41, max: 0.65},
+  "Others": {min: 0.47, max: 0.71}
+};
+
+// Shared
+let currentService = "BoilerDoc";
+
+function setService(svc) {
+  currentService = svc;
+  document.getElementById('tab-boilerdoc').classList.toggle('active', svc==="BoilerDoc");
+  document.getElementById('tab-weldserve').classList.toggle('active', svc==="WeldServe");
+  document.getElementById('boilerdocInputs').classList.toggle('hidden', svc!=="BoilerDoc");
+  document.getElementById('weldserveInputs').classList.toggle('hidden', svc!=="WeldServe");
+  document.getElementById('inputsTitle').textContent = svc === "BoilerDoc" ? "Inputs – BoilerDoc" : "Inputs – WeldServe";
+  document.getElementById('hintText').textContent =
+    svc === "BoilerDoc"
+      ? "BoilerDoc margins capped 48–84% as per Excel guidelines."
+      : "WeldServe margins capped by activity type as per WeldServe Excel.";
+  recalc();
+}
+
+function recalc() {
   const vRate = Number(document.getElementById('vendorRate').value || 0);
   const iRate = Number(document.getElementById('internalRate').value || 0);
   const lb    = Number(document.getElementById('lbCost').value || 0);
-  const disc  = Number(document.getElementById('disc').value || 0) / 100;
-  const prem  = Number(document.getElementById('prem').value || 0) / 100;
+  const disc  = Number(document.getElementById('disc').value || 0)/100;
+  const prem  = Number(document.getElementById('prem').value || 0)/100;
 
-  // 1) Min mandays
-  const minM = minMandaysTable[cap] || 0;
-  document.getElementById('minMandays').textContent = minM ? minM.toFixed(1) : "–";
+  let totalCost = 0;
+  let recM = 0;
 
-  // 2) Costs
-  const vCost = vMd * vRate;
-  const iCost = iMd * iRate;
-  const totalCost = vCost + iCost + lb;
+  if (currentService === "BoilerDoc") {
+    const cap   = document.getElementById('bd_capacity').value;
+    const vMd   = Number(document.getElementById('bd_vendorMd').value || 0);
+    const iMd   = Number(document.getElementById('bd_internalMd').value || 0);
+    const cust  = document.getElementById('bd_customerType').value;
+    const local = document.getElementById('bd_localVendors').value;
+    const reason= document.getElementById('bd_reason').value;
 
-  document.getElementById('vendorCost').textContent  = vCost.toLocaleString('en-IN');
-  document.getElementById('internalCost').textContent= iCost.toLocaleString('en-IN');
-  document.getElementById('totalCost').textContent   = totalCost.toLocaleString('en-IN');
+    const vCost = vMd * vRate;
+    const iCost = iMd * iRate;
+    totalCost = vCost + iCost + lb;
 
-  // 3) Base margin
-  const key = cap + "|" + cust;
-  let baseM = baseMarginTable[key];
-  if (baseM == null) baseM = 0.60; // fallback
-  document.getElementById('baseMargin').textContent = (baseM*100).toFixed(1) + "%";
+    const key = cap + "|" + cust;
+    let baseM = baseMarginBoilerDoc[key] ?? 0.60;
 
-  // 4) Value-based uplift (simple sum of four criteria + Q4Q5 combo)
-  let uplift = 0;
-  uplift += UPLIFT_CAPACITY;
-  uplift += UPLIFT_CUSTTYPE;
-  uplift += UPLIFT_REASON;
-  uplift += UPLIFT_VENDOR;
-  uplift += q4q5Extra(local, reason);
+    let uplift = BD_UP_CAP + BD_UP_CUST + BD_UP_REASON + BD_UP_VENDOR + bd_q4q5Extra(local, reason);
+    recM = baseM + uplift;
+    if (recM < BD_MIN_M) recM = BD_MIN_M;
+    if (recM > BD_MAX_M) recM = BD_MAX_M;
+  } else {
+    const act   = document.getElementById('ws_activity').value;
+    const vMd   = Number(document.getElementById('ws_vendorMd').value || 0);
+    const iMd   = Number(document.getElementById('ws_internalMd').value || 0);
+    const cust  = document.getElementById('ws_customerType').value;
+    const local = document.getElementById('ws_localVendors').value;
+    const urg   = document.getElementById('ws_urgency').value;
 
-  document.getElementById('uplift').textContent = (uplift*100).toFixed(1) + "%";
+    // Apply extra manday factor to internal manpower (like Excel adjustment) [file:123]
+    const adjFactor = ws_extraMandayFactor[act] ?? 0;
+    const adjInternalMd = iMd * (1 + adjFactor);
 
-  // 5) Recommended margin with caps
-  let recM = baseM + uplift;
-  if (recM < MIN_MARGIN) recM = MIN_MARGIN;
-  if (recM > MAX_MARGIN) recM = MAX_MARGIN;
-  document.getElementById('recMargin').textContent = (recM*100).toFixed(1) + "%";
+    const vCost = vMd * vRate;
+    const iCost = adjInternalMd * iRate;
+    totalCost = vCost + iCost + lb;
 
-  // 6) Price
+    const key = act + "|" + cust;
+    let baseM = baseMarginWeldServe[key] ?? 0.565;
+
+    const uplift = ws_urgencyLocalUplift(urg, local);
+    let bounds = ws_minMaxMargin[act] || {min:0.41, max:0.83};
+    recM = baseM + uplift;
+    if (recM < bounds.min) recM = bounds.min;
+    if (recM > bounds.max) recM = bounds.max;
+  }
+
   const recPrice = totalCost / (1 - recM);
-  document.getElementById('recPrice').textContent =
-    isFinite(recPrice) ? recPrice.toLocaleString('en-IN', {maximumFractionDigits:0}) : "–";
+  const finalPrice = recPrice * (1 - disc) * (1 + prem);
 
-  let finalPrice = recPrice;
-  finalPrice = finalPrice * (1 - disc) * (1 + prem);
+  document.getElementById('recMargin').textContent =
+    isFinite(recM) ? (recM*100).toFixed(1) + "%" : "–";
+  document.getElementById('recPrice').textContent =
+    isFinite(recPrice) ? recPrice.toLocaleString('en-IN',{maximumFractionDigits:0}) : "–";
   document.getElementById('finalPrice').textContent =
-    isFinite(finalPrice) ? finalPrice.toLocaleString('en-IN', {maximumFractionDigits:0}) : "–";
+    isFinite(finalPrice) ? finalPrice.toLocaleString('en-IN',{maximumFractionDigits:0}) : "–";
 }
 
-// initial calculation
-recalc();
+setService("BoilerDoc");
 </script>
 </body>
 </html>
