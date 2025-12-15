@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>BoilerDoc Pricing Calculator</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 24px; max-width: 900px; }
+    h1 { margin-bottom: 4px; }
+    h2 { margin-top: 24px; }
+    label { font-weight: 600; display:block; margin-top:10px; }
+    select, input { width: 360px; padding:4px; margin-top:4px; }
+    .row { margin-bottom: 8px; }
+    .two-col { display:flex; flex-wrap:wrap; gap:32px; }
+    .card { border:1px solid #ccc; padding:12px 16px; margin-top:16px; border-radius:4px; }
+    .value { font-weight:700; }
+  </style>
+</head>
+<body>
+<h1>BoilerDoc – RLA Pricing Tool</h1>
+<p>Quick calculator based on your Excel BoilerDoc Tool & List sheets.</p>
+
+<div class="card">
+  <h2>Inputs</h2>
+
+  <div class="row">
+    <label for="capacity">Q1. Equipment type / boiler capacity</label>
+    <select id="capacity">
+      <option>Boiler: Upto 2 tph</option>
+      <option>Boiler: 3 tph - 6 tph</option>
+      <option>Boiler: 7 tph - 10tph</option>
+      <option>Boiler: 10 - 15tph</option>
+      <option>Boiler: > 15 tph</option>
+      <option>Chimney</option>
+      <option>Heater</option>
+    </select>
+  </div>
+
+  <div class="row">
+    <label for="vendorMandays">Q2. Budgeted vendor manpower (mandays)</label>
+    <input id="vendorMandays" type="number" value="13" min="0" step="0.1">
+  </div>
+
+  <div class="row">
+    <label for="internalMandays">Q3. Budgeted internal manpower (Thermax mandays)</label>
+    <input id="internalMandays" type="number" value="1" min="0" step="0.1">
+  </div>
+
+  <div class="row">
+    <label for="customerType">Type of customer</label>
+    <select id="customerType">
+      <option>Corporate (Global HQ, National-level account)</option>
+      <option>Corporate (India-based standalone)</option>
+      <option>MSME/ Owner-driven</option>
+    </select>
+  </div>
+
+  <div class="row">
+    <label for="localVendors">Q4. Is the customer likely to take service from local vendors?</label>
+    <select id="localVendors">
+      <option>No</option>
+      <option>Yes</option>
+    </select>
+  </div>
+
+  <div class="row">
+    <label for="reason">Q5. Primary reason for availing the service</label>
+    <select id="reason">
+      <option>Thermax-led (Push from Thermax)</option>
+      <option>Customer-led (Regulatory compliance/ Internal compliance)</option>
+    </select>
+  </div>
+
+  <div class="two-col">
+    <div>
+      <label for="vendorRate">Vendor cost per manday (₹)</label>
+      <input id="vendorRate" type="number" value="6700">
+    </div>
+    <div>
+      <label for="internalRate">Thermax engineer cost per manday (₹)</label>
+      <input id="internalRate" type="number" value="4200">
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div>
+      <label for="lbCost">Lodging / boarding (₹, total)</label>
+      <input id="lbCost" type="number" value="0">
+    </div>
+    <div>
+      <label for="disc">Discount % (optional)</label>
+      <input id="disc" type="number" value="0">
+    </div>
+  </div>
+
+  <div class="row">
+    <label for="prem">Premium % (optional)</label>
+    <input id="prem" type="number" value="0">
+  </div>
+
+  <button onclick="recalc()">Calculate</button>
+</div>
+
+<div class="card">
+  <h2>Outputs</h2>
+  <div>Minimum manpower based on equipment (mandays): <span class="value" id="minMandays">–</span></div>
+  <div>Estimated vendor cost (₹): <span class="value" id="vendorCost">–</span></div>
+  <div>Estimated internal cost (₹): <span class="value" id="internalCost">–</span></div>
+  <div>Total cost incl. L/B (₹): <span class="value" id="totalCost">–</span></div>
+  <hr>
+  <div>Base margin % (capacity × customer type): <span class="value" id="baseMargin">–</span></div>
+  <div>Value‑based uplift from Q2–Q5 %: <span class="value" id="uplift">–</span></div>
+  <div>Recommended margin % (capped 48–84): <span class="value" id="recMargin">–</span></div>
+  <div>Recommended price (₹): <span class="value" id="recPrice">–</span></div>
+  <div>Final price after discount/premium (₹): <span class="value" id="finalPrice">–</span></div>
+</div>
+
+<script>
+// ===== Lookup tables reproduced from BoilerDoc - List ===== [file:106]
+
+// Minimum mandays by capacity
+const minMandaysTable = {
+  "Boiler: Upto 2 tph": 5,
+  "Boiler: 3 tph - 6 tph": 10,
+  "Boiler: 7 tph - 10tph": 12,
+  "Boiler: 10 - 15tph": 15,
+  "Boiler: > 15 tph": 20,
+  "Chimney": 4,
+  "Heater": 4
+};
+
+// Base margin % by capacity × customer type
+const baseMarginTable = {
+  "Boiler: Upto 2 tph|Corporate (Global HQ, National-level account)": 0.60,
+  "Boiler: 3 tph - 6 tph|Corporate (Global HQ, National-level account)": 0.63,
+  "Boiler: 7 tph - 10tph|Corporate (Global HQ, National-level account)": 0.66,
+  "Boiler: 10 - 15tph|Corporate (Global HQ, National-level account)": 0.69,
+  "Boiler: > 15 tph|Corporate (Global HQ, National-level account)": 0.72,
+  "Chimney|Corporate (Global HQ, National-level account)": 0.60,
+  "Heater|Corporate (Global HQ, National-level account)": 0.60,
+
+  "Boiler: Upto 2 tph|Corporate (India-based standalone)": 0.54,
+  "Boiler: 3 tph - 6 tph|Corporate (India-based standalone)": 0.57,
+  "Boiler: 7 tph - 10tph|Corporate (India-based standalone)": 0.60,
+  "Boiler: 10 - 15tph|Corporate (India-based standalone)": 0.63,
+  "Boiler: > 15 tph|Corporate (India-based standalone)": 0.66,
+  "Chimney|Corporate (India-based standalone)": 0.54,
+  "Heater|Corporate (India-based standalone)": 0.54,
+
+  "Boiler: Upto 2 tph|MSME/ Owner-driven": 0.475,
+  "Boiler: 3 tph - 6 tph|MSME/ Owner-driven": 0.51,
+  "Boiler: 7 tph - 10tph|MSME/ Owner-driven": 0.54,
+  "Boiler: 10 - 15tph|MSME/ Owner-driven": 0.57,
+  "Boiler: > 15 tph|MSME/ Owner-driven": 0.60,
+  "Chimney|MSME/ Owner-driven": 0.48,
+  "Heater|MSME/ Owner-driven": 0.48
+};
+
+// Uplifts derived from your std-dev logic (absolute points) [file:106]
+const UPLIFT_CAPACITY = 0.03;  // 3 pp
+const UPLIFT_CUSTTYPE = 0.06;  // 6 pp
+const UPLIFT_REASON   = 0.06;  // 6 pp
+const UPLIFT_VENDOR   = 0.06;  // 6 pp
+const MIN_MARGIN = 0.48;
+const MAX_MARGIN = 0.84;
+
+// Extra uplift based on Q4 (local vendors) × Q5 (reason) combo [file:106]
+function q4q5Extra(local, reason) {
+  if (local === "Yes" && reason.startsWith("Thermax-led")) return 0.00;  // YesThermax-led = 0%
+  if (local === "No"  && reason.startsWith("Customer-led")) return 0.12; // NoCustomer-led = 12%
+  if (local === "Yes" && reason.startsWith("Customer-led")) return 0.06; // YesCustomer-led = 6%
+  if (local === "No"  && reason.startsWith("Thermax-led")) return 0.06;  // NoThermax-led = 6%
+  return 0;
+}
+
+// ===== Core calculation =====
+function recalc() {
+  const cap   = document.getElementById('capacity').value;
+  const vMd   = Number(document.getElementById('vendorMandays').value || 0);
+  const iMd   = Number(document.getElementById('internalMandays').value || 0);
+  const cust  = document.getElementById('customerType').value;
+  const local = document.getElementById('localVendors').value;
+  const reason= document.getElementById('reason').value;
+
+  const vRate = Number(document.getElementById('vendorRate').value || 0);
+  const iRate = Number(document.getElementById('internalRate').value || 0);
+  const lb    = Number(document.getElementById('lbCost').value || 0);
+  const disc  = Number(document.getElementById('disc').value || 0) / 100;
+  const prem  = Number(document.getElementById('prem').value || 0) / 100;
+
+  // 1) Min mandays
+  const minM = minMandaysTable[cap] || 0;
+  document.getElementById('minMandays').textContent = minM ? minM.toFixed(1) : "–";
+
+  // 2) Costs
+  const vCost = vMd * vRate;
+  const iCost = iMd * iRate;
+  const totalCost = vCost + iCost + lb;
+
+  document.getElementById('vendorCost').textContent  = vCost.toLocaleString('en-IN');
+  document.getElementById('internalCost').textContent= iCost.toLocaleString('en-IN');
+  document.getElementById('totalCost').textContent   = totalCost.toLocaleString('en-IN');
+
+  // 3) Base margin
+  const key = cap + "|" + cust;
+  let baseM = baseMarginTable[key];
+  if (baseM == null) baseM = 0.60; // fallback
+  document.getElementById('baseMargin').textContent = (baseM*100).toFixed(1) + "%";
+
+  // 4) Value-based uplift (simple sum of four criteria + Q4Q5 combo)
+  let uplift = 0;
+  uplift += UPLIFT_CAPACITY;
+  uplift += UPLIFT_CUSTTYPE;
+  uplift += UPLIFT_REASON;
+  uplift += UPLIFT_VENDOR;
+  uplift += q4q5Extra(local, reason);
+
+  document.getElementById('uplift').textContent = (uplift*100).toFixed(1) + "%";
+
+  // 5) Recommended margin with caps
+  let recM = baseM + uplift;
+  if (recM < MIN_MARGIN) recM = MIN_MARGIN;
+  if (recM > MAX_MARGIN) recM = MAX_MARGIN;
+  document.getElementById('recMargin').textContent = (recM*100).toFixed(1) + "%";
+
+  // 6) Price
+  const recPrice = totalCost / (1 - recM);
+  document.getElementById('recPrice').textContent =
+    isFinite(recPrice) ? recPrice.toLocaleString('en-IN', {maximumFractionDigits:0}) : "–";
+
+  let finalPrice = recPrice;
+  finalPrice = finalPrice * (1 - disc) * (1 + prem);
+  document.getElementById('finalPrice').textContent =
+    isFinite(finalPrice) ? finalPrice.toLocaleString('en-IN', {maximumFractionDigits:0}) : "–";
+}
+
+// initial calculation
+recalc();
+</script>
+</body>
+</html>
