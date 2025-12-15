@@ -5,45 +5,159 @@
   <title>Services Pricing Tool – BoilerDoc & WeldServe</title>
   <style>
     :root {
-      --primary: #0b7285; --primary-light: #e3fafc;
-      --border: #dde2e5; --bg: #f5f7fa; --text: #222;
+      --primary: #c92a2a;          /* red */
+      --primary-light: #ffe3e3;
+      --border: #e0e0e0;
+      --bg: #f8f9fa;
+      --text: #212529;
     }
     * { box-sizing: border-box; }
-    body { font-family: system-ui,-apple-system,"Segoe UI",sans-serif; margin:0; background:var(--bg); color:var(--text); }
+    body {
+      font-family: system-ui,-apple-system,"Segoe UI",sans-serif;
+      margin:0;
+      background:var(--bg);
+      color:var(--text);
+    }
     .wrapper { max-width: 980px; margin: 32px auto 40px; padding: 0 16px; }
-    header h1 { margin:0 0 4px; font-size:24px; color:var(--primary); }
+    header h1 {
+      margin:0 0 4px;
+      font-size:26px;
+      color:var(--primary);
+      letter-spacing:0.02em;
+    }
     header p { margin:0; color:#555; font-size:13px; }
     .service-toggle { margin-top:12px; display:flex; gap:8px; }
     .pill {
-      padding:6px 16px; border-radius:999px; border:1px solid var(--border);
-      background:#fff; cursor:pointer; font-size:13px;
+      padding:6px 16px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:#fff;
+      cursor:pointer;
+      font-size:13px;
     }
-    .pill.active { background:var(--primary); color:#fff; border-color:var(--primary); }
-    .grid { display:grid; grid-template-columns:minmax(0,1.1fr) minmax(0,0.9fr); gap:20px; margin-top:20px; }
-    .card { background:#fff; border-radius:10px; border:1px solid var(--border); box-shadow:0 4px 8px rgba(15,23,42,0.04); padding:16px 18px 18px; }
-    .card h2 { margin:0 0 10px; font-size:16px; color:#111827; }
-    label { font-weight:600; display:block; margin-top:10px; font-size:13px; }
+    .pill.active {
+      background:var(--primary);
+      color:#fff;
+      border-color:var(--primary);
+      box-shadow:0 2px 5px rgba(201,42,42,0.35);
+    }
+    .grid {
+      display:grid;
+      grid-template-columns:minmax(0,1.05fr) minmax(0,0.95fr);
+      gap:20px;
+      margin-top:20px;
+    }
+    .card {
+      background:#fff;
+      border-radius:12px;
+      border:1px solid var(--border);
+      box-shadow:0 6px 16px rgba(15,23,42,0.06);
+      padding:16px 18px 18px;
+    }
+    .card h2 {
+      margin:0 0 10px;
+      font-size:16px;
+      color:var(--primary);
+      text-transform:uppercase;
+      letter-spacing:0.05em;
+    }
+    label {
+      font-weight:600;
+      display:block;
+      margin-top:10px;
+      font-size:13px;
+    }
     select,input {
-      width:100%; padding:6px 8px; margin-top:4px; border-radius:6px;
-      border:1px solid #cbd5e1; font-size:13px;
+      width:100%;
+      padding:6px 8px;
+      margin-top:4px;
+      border-radius:6px;
+      border:1px solid #cbd5e1;
+      font-size:13px;
+      background:#fff;
     }
-    select:focus,input:focus { outline:2px solid var(--primary-light); border-color:var(--primary); }
-    .two-col { display:flex; flex-wrap:wrap; gap:16px; margin-top:4px; align-items:flex-end; }
+    select:focus,input:focus {
+      outline:2px solid var(--primary-light);
+      border-color:var(--primary);
+    }
+    .two-col {
+      display:flex;
+      flex-wrap:wrap;
+      gap:16px;
+      margin-top:4px;
+      align-items:flex-end;
+    }
     .two-col>div { flex:1 1 0; }
+
     #calcBtn {
-      margin-top:14px; padding:10px 28px; font-size:15px; font-weight:600;
-      cursor:pointer; background:var(--primary); color:#fff; border-radius:999px;
-      border:none; box-shadow:0 3px 6px rgba(15,23,42,0.18);
+      margin-top:16px;
+      padding:11px 30px;
+      font-size:15px;
+      font-weight:600;
+      cursor:pointer;
+      background:var(--primary);
+      color:#fff;
+      border-radius:999px;
+      border:none;
+      box-shadow:0 4px 10px rgba(201,42,42,0.35);
+      transition: transform 0.05s ease, box-shadow 0.1s ease, background 0.1s ease;
     }
-    #calcBtn:hover { background:#0c8599; }
-    .output-row { display:flex; justify-content:space-between; margin-top:6px; padding:6px 8px; border-radius:6px; }
-    .output-row:nth-child(odd) { background:#f8fafc; }
-    .output-label { font-size:13px; color:#555; }
-    .value { font-weight:700; font-size:15px; color:#111827; }
+    #calcBtn:hover {
+      background:#e03131;
+      box-shadow:0 6px 14px rgba(201,42,42,0.45);
+      transform:translateY(-1px);
+    }
+    #calcBtn:active {
+      transform:translateY(0);
+      box-shadow:0 3px 7px rgba(201,42,42,0.30);
+    }
+
+    .kpi-grid {
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      margin-top:4px;
+    }
+    .kpi-card {
+      border-radius:12px;
+      padding:10px 12px;
+      background:#fff5f5;
+      border:1px solid #ffc9c9;
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+    }
+    .kpi-label {
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:0.08em;
+      color:#c92a2a;
+    }
+    .kpi-value {
+      font-size:22px;
+      font-weight:700;
+      color:#212529;
+    }
+    .kpi-sub {
+      font-size:11px;
+      color:#868e96;
+    }
+
     .hint { font-size:11px; color:#6b7280; margin-top:4px; }
-    .tag { display:inline-block; padding:2px 8px; border-radius:999px; background:var(--primary-light); color:var(--primary); font-size:11px; font-weight:600; margin-left:4px; }
+    .tag {
+      display:inline-block;
+      padding:2px 8px;
+      border-radius:999px;
+      background:var(--primary-light);
+      color:var(--primary);
+      font-size:11px;
+      font-weight:600;
+      margin-left:4px;
+    }
     .hidden { display:none; }
-    @media(max-width:800px){ .grid{grid-template-columns:1fr;} }
+    @media(max-width:800px){
+      .grid{grid-template-columns:1fr;}
+    }
   </style>
 </head>
 <body>
@@ -156,32 +270,33 @@
       </div>
 
       <button id="calcBtn" onclick="recalc()">Calculate</button>
-      <div class="hint">Start without discount/premium to see the recommended price.</div>
+      <div class="hint">Use whole numbers for mandays. Start with 0% discount/premium.</div>
     </div>
 
     <div class="card">
-      <h2>Outputs</h2>
-      <div class="output-row">
-        <div class="output-label">Recommended margin %</div>
-        <div class="value" id="recMargin">–</div>
-      </div>
-      <div class="output-row">
-        <div class="output-label">Recommended price (₹)</div>
-        <div class="value" id="recPrice">–</div>
-      </div>
-      <div class="output-row">
-        <div class="output-label">Final price after discount / premium (₹)</div>
-        <div class="value" id="finalPrice">–</div>
-      </div>
-      <div class="hint" id="hintText">
-        BoilerDoc margins capped 48–84% as per Excel guidelines.
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-label">Recommended margin</div>
+          <div class="kpi-value" id="recMargin">–</div>
+          <div class="kpi-sub" id="hintMargin">Based on base margin + value uplifts, with caps per service.</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Recommended price (₹)</div>
+          <div class="kpi-value" id="recPrice">–</div>
+          <div class="kpi-sub">Total cost grossed up to target margin.</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Final price (₹)</div>
+          <div class="kpi-value" id="finalPrice">–</div>
+          <div class="kpi-sub">After applying optional discount / premium.</div>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
 <script>
-// --- BoilerDoc tables (as before) [file:123]
+// BoilerDoc tables [file:123]
 const baseMarginBoilerDoc = {
   "Boiler: Upto 2 tph|Corporate (Global HQ, National-level account)": 0.60,
   "Boiler: 3 tph - 6 tph|Corporate (Global HQ, National-level account)": 0.63,
@@ -222,8 +337,7 @@ function bd_q4q5Extra(local, reason) {
   return 0;
 }
 
-// --- WeldServe tables [file:123]
-// Base margin by activity × customer type
+// WeldServe tables [file:123]
 const baseMarginWeldServe = {
   "Coil repair|Corporate (Global HQ, National-level account)": 0.75,
   "Pressure part repair|Corporate (Global HQ, National-level account)": 0.623,
@@ -240,7 +354,6 @@ const baseMarginWeldServe = {
   "Pressure part replacement|MSME/ Owner-driven": 0.409,
   "Others|MSME/ Owner-driven": 0.47
 };
-// Urgency + local-vendor uplift % [file:123]
 function ws_urgencyLocalUplift(urgency, local) {
   const key = urgency + "|" + local;
   switch (key) {
@@ -253,14 +366,12 @@ function ws_urgencyLocalUplift(urgency, local) {
     default: return 0;
   }
 }
-// Additional manpower adjustment factor % by activity [file:123]
 const ws_extraMandayFactor = {
   "Coil repair": 0.00,
   "Pressure part repair": 0.10,
   "Pressure part replacement": 0.15,
   "Others": 0.15
 };
-// Min/max margins by activity [file:123]
 const ws_minMaxMargin = {
   "Coil repair": {min: 0.59, max: 0.83},
   "Pressure part repair": {min: 0.46, max: 0.70},
@@ -268,7 +379,6 @@ const ws_minMaxMargin = {
   "Others": {min: 0.47, max: 0.71}
 };
 
-// Shared
 let currentService = "BoilerDoc";
 
 function setService(svc) {
@@ -277,10 +387,11 @@ function setService(svc) {
   document.getElementById('tab-weldserve').classList.toggle('active', svc==="WeldServe");
   document.getElementById('boilerdocInputs').classList.toggle('hidden', svc!=="BoilerDoc");
   document.getElementById('weldserveInputs').classList.toggle('hidden', svc!=="WeldServe");
-  document.getElementById('inputsTitle').textContent = svc === "BoilerDoc" ? "Inputs – BoilerDoc" : "Inputs – WeldServe";
-  document.getElementById('hintText').textContent =
+  document.getElementById('inputsTitle').textContent =
+    svc === "BoilerDoc" ? "Inputs – BoilerDoc" : "Inputs – WeldServe";
+  document.getElementById('hintMargin').textContent =
     svc === "BoilerDoc"
-      ? "BoilerDoc margins capped 48–84% as per Excel guidelines."
+      ? "BoilerDoc margins capped 48–84% as per BoilerDoc Excel."
       : "WeldServe margins capped by activity type as per WeldServe Excel.";
   recalc();
 }
@@ -299,6 +410,12 @@ function recalc() {
     const cap   = document.getElementById('bd_capacity').value;
     const vMd   = Number(document.getElementById('bd_vendorMd').value || 0);
     const iMd   = Number(document.getElementById('bd_internalMd').value || 0);
+
+    if (!Number.isInteger(vMd) || !Number.isInteger(iMd)) {
+      alert("For BoilerDoc, budgeted mandays must be whole numbers (no decimals).");
+      return;
+    }
+
     const cust  = document.getElementById('bd_customerType').value;
     const local = document.getElementById('bd_localVendors').value;
     const reason= document.getElementById('bd_reason').value;
@@ -314,16 +431,22 @@ function recalc() {
     recM = baseM + uplift;
     if (recM < BD_MIN_M) recM = BD_MIN_M;
     if (recM > BD_MAX_M) recM = BD_MAX_M;
+
   } else {
     const act   = document.getElementById('ws_activity').value;
     const vMd   = Number(document.getElementById('ws_vendorMd').value || 0);
     const iMd   = Number(document.getElementById('ws_internalMd').value || 0);
+
+    if (!Number.isInteger(vMd) || !Number.isInteger(iMd)) {
+      alert("For WeldServe, budgeted mandays must be whole numbers (no decimals).");
+      return;
+    }
+
     const cust  = document.getElementById('ws_customerType').value;
     const local = document.getElementById('ws_localVendors').value;
     const urg   = document.getElementById('ws_urgency').value;
 
-    // Apply extra manday factor to internal manpower (like Excel adjustment) [file:123]
-    const adjFactor = ws_extraMandayFactor[act] ?? 0;
+    const adjFactor     = ws_extraMandayFactor[act] ?? 0;
     const adjInternalMd = iMd * (1 + adjFactor);
 
     const vCost = vMd * vRate;
